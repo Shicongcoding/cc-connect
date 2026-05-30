@@ -57,7 +57,11 @@ func (e *Engine) writeCrashLog(r any, stack string) {
 		slog.Error("crash log: open failed", "path", path, "error", err)
 		return
 	}
-	defer f.Close()
+	defer func() {
+		if err := f.Close(); err != nil {
+			slog.Error("crash log: close failed", "error", err)
+		}
+	}()
 	if _, err := fmt.Fprint(f, entry); err != nil {
 		slog.Error("crash log: write failed", "error", err)
 	}
